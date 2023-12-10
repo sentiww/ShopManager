@@ -1,0 +1,32 @@
+﻿services:
+  shopmanager.web:
+    image: shopmanager.web
+    build:
+      context: .
+      dockerfile: ShopManager.Web/Dockerfile
+    environment:
+        ConnectionStrings__DefaultConnection: Host=shopmanager.postgres;Port=5432;Database=shopmanager;Username=postgres;Password=postgres
+    networks:
+      - proxynet
+  shopmanager.postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: shopmanager
+    ports:
+      - "5432:5432"
+    networks:
+      - proxynet
+  shopmanager.pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: contact@senti.dev
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    ports:
+      - "5050:80"
+    networks:
+      - proxynet
+networks:
+  proxynet:
+    name: custom_network
