@@ -12,7 +12,7 @@ using ShopManager.Persistence;
 namespace ShopManager.Persistence.Migrations
 {
     [DbContext(typeof(ShopManagerContext))]
-    [Migration("20231210182440_Initial")]
+    [Migration("20231211095013_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,36 @@ namespace ShopManager.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CollectionEntityProductEntity", b =>
+                {
+                    b.Property<Guid>("CollectionsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CollectionsId", "ProductsId");
+
+                    b.HasIndex("ProductsId");
+
+                    b.ToTable("CollectionEntityProductEntity");
+                });
+
+            modelBuilder.Entity("CollectionEntityShopManagerUserEntity", b =>
+                {
+                    b.Property<Guid>("CollectionsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("text");
+
+                    b.HasKey("CollectionsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("CollectionEntityShopManagerUserEntity");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -157,6 +187,71 @@ namespace ShopManager.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ShopManager.Persistence.Entity.CollectionEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Collections");
+                });
+
+            modelBuilder.Entity("ShopManager.Persistence.Entity.DiscountEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Discounts");
+                });
+
+            modelBuilder.Entity("ShopManager.Persistence.Entity.ProductEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("ShopManager.Persistence.Entity.ShopManagerUserEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -199,6 +294,9 @@ namespace ShopManager.Persistence.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("ProductEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -218,7 +316,39 @@ namespace ShopManager.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("ProductEntityId");
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("CollectionEntityProductEntity", b =>
+                {
+                    b.HasOne("ShopManager.Persistence.Entity.CollectionEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShopManager.Persistence.Entity.ProductEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CollectionEntityShopManagerUserEntity", b =>
+                {
+                    b.HasOne("ShopManager.Persistence.Entity.CollectionEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShopManager.Persistence.Entity.ShopManagerUserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -270,6 +400,31 @@ namespace ShopManager.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ShopManager.Persistence.Entity.DiscountEntity", b =>
+                {
+                    b.HasOne("ShopManager.Persistence.Entity.ProductEntity", "Product")
+                        .WithMany("Discounts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ShopManager.Persistence.Entity.ShopManagerUserEntity", b =>
+                {
+                    b.HasOne("ShopManager.Persistence.Entity.ProductEntity", null)
+                        .WithMany("Users")
+                        .HasForeignKey("ProductEntityId");
+                });
+
+            modelBuilder.Entity("ShopManager.Persistence.Entity.ProductEntity", b =>
+                {
+                    b.Navigation("Discounts");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

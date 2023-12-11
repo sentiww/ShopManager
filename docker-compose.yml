@@ -6,6 +6,8 @@
       dockerfile: ShopManager.Web/Dockerfile
     environment:
         ConnectionStrings__DefaultConnection: Host=shopmanager.postgres;Port=5432;Database=shopmanager;Username=postgres;Password=postgres
+    ports:
+      - "8000:8080"
     networks:
       - proxynet
   shopmanager.postgres:
