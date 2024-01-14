@@ -18,9 +18,9 @@ public static class PagedCollectionExtensions
         int pageSize,
         CancellationToken ct = default)
     {
-        if (page < 1)
+        if (page < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(page), page, "Page must be greater than or equal to 1.");
+            throw new ArgumentOutOfRangeException(nameof(page), page, "Page must be greater than or equal to 0.");
         }
         
         if (pageSize < 1)
@@ -28,7 +28,7 @@ public static class PagedCollectionExtensions
             throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, "Page size must be greater than or equal to 1.");
         }
         
-        var skip = (page - 1) * pageSize;
+        var skip = page * pageSize;
         
         var totalCount = await source.CountAsync(ct);
         

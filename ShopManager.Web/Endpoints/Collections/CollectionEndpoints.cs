@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManager.Persistence;
+using ShopManager.Web.Common;
 using ShopManager.Web.Utilities;
 
 namespace ShopManager.Web.Endpoints.Collections;
@@ -35,10 +36,15 @@ public static class CollectionEndpoints
     }
 
     private static async Task<Ok<PagedCollection<CollectionDto>>> GetCollections(
+        [FromQuery] int page,
+        [FromQuery] int pageSize,
+        [FromQuery] string? sortLabel,
+        [FromQuery] int? sortDirection,
+        [FromQuery] string? searchString,
         [FromServices] ShopManagerContext context,
         CancellationToken ct)
     {
-        var collections = await context.Collections
+        var query = context.Collections
             .Select(collection => new CollectionDto
             {
                 Id = collection.Id,
@@ -57,8 +63,50 @@ public static class CollectionEndpoints
                         UserName = user.UserName
                     })
                     .ToList()
-            })
-            .ToPagedCollectionAsync(1, 10, ct);
+            });
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            var lowerSearchString = searchString.ToLower();
+            query = query.Where(collection => collection.Id.ToString().Contains(lowerSearchString) ||
+                                              collection.Name.ToLower().Contains(lowerSearchString));
+        }
+        
+        var orderDirection = SortDirection.Ascending;
+        if (sortDirection.HasValue)
+        {
+            orderDirection = (SortDirection)sortDirection.Value;
+        }
+        
+        if (!string.IsNullOrWhiteSpace(sortLabel))
+        {
+            switch (orderDirection)
+            {
+                case SortDirection.None:
+                    break;
+                case SortDirection.Ascending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderBy(collection => collection.Id),
+                        "name" => query.OrderBy(collection => collection.Name),
+                        _ => query
+                    };
+                    break;
+                case SortDirection.Descending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderByDescending(collection => collection.Id),
+                        "name" => query.OrderByDescending(collection => collection.Name),
+                        _ => query
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(orderDirection), orderDirection, null);
+            }
+        }
+        
+        var collections = await query
+            .ToPagedCollectionAsync(page, pageSize, ct);
         
         return TypedResults.Ok(collections);
     }

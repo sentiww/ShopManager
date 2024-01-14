@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManager.Persistence;
+using ShopManager.Web.Common;
 using ShopManager.Web.Utilities;
 
 namespace ShopManager.Web.Endpoints.Discounts;
@@ -35,20 +36,77 @@ public static class DiscountEndpoints
     }
 
     private static async Task<Ok<PagedCollection<DiscountDto>>> GetDiscounts(
+        [FromQuery] int page,
+        [FromQuery] int pageSize,
+        [FromQuery] string? sortLabel,
+        [FromQuery] int? sortDirection,
+        [FromQuery] string? searchString,
         [FromServices] ShopManagerContext context,
         CancellationToken ct)
     {
-        var discounts = await context.Discounts
+        var query = context.Discounts
             .Select(discount => new DiscountDto
             {
                 Id = discount.Id,
                 Percentage = discount.Percentage,
                 StartDate = discount.StartDate,
                 EndDate = discount.EndDate,
-                ProductId = discount.ProductId
-            })
-            .OrderBy(discount => discount.Id)
-            .ToPagedCollectionAsync(1, 10, ct);
+                ProductId = discount.ProductId,
+                ProductName = discount.Product.Name
+            });
+        
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            var lowerSearchString = searchString.ToLower();
+            query = query.Where(discount => discount.Id.ToString().Contains(lowerSearchString) || 
+                                            discount.Percentage.ToString().Contains(lowerSearchString) ||
+                                            discount.StartDate.ToString().Contains(lowerSearchString) ||
+                                            discount.EndDate.ToString().Contains(lowerSearchString) ||
+                                            discount.ProductId.ToString().Contains(lowerSearchString) ||
+                                            discount.ProductName.Contains(lowerSearchString));
+        }
+        
+        var orderDirection = SortDirection.Ascending;
+        if (sortDirection.HasValue)
+        {
+            orderDirection = (SortDirection)sortDirection.Value;
+        }
+        
+        if (!string.IsNullOrWhiteSpace(sortLabel))
+        {
+            switch (orderDirection)
+            {
+                case SortDirection.Ascending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderBy(discount => discount.Id),
+                        "percentage" => query.OrderBy(discount => discount.Percentage),
+                        "startDate" => query.OrderBy(discount => discount.StartDate),
+                        "endDate" => query.OrderBy(discount => discount.EndDate),
+                        "productId" => query.OrderBy(discount => discount.ProductId),
+                        "productName" => query.OrderBy(discount => discount.ProductName),
+                        _ => query
+                    };
+                    break;
+                case SortDirection.Descending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderByDescending(discount => discount.Id),
+                        "percentage" => query.OrderByDescending(discount => discount.Percentage),
+                        "startDate" => query.OrderByDescending(discount => discount.StartDate),
+                        "endDate" => query.OrderByDescending(discount => discount.EndDate),
+                        "productId" => query.OrderByDescending(discount => discount.ProductId),
+                        "productName" => query.OrderByDescending(discount => discount.ProductName),
+                        _ => query
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(orderDirection), orderDirection, null);
+            }
+        }
+        
+        var discounts = await query
+            .ToPagedCollectionAsync(page, pageSize, ct);
         
         return TypedResults.Ok(discounts);
     }
@@ -65,7 +123,8 @@ public static class DiscountEndpoints
                 Percentage = discount.Percentage,
                 StartDate = discount.StartDate,
                 EndDate = discount.EndDate,
-                ProductId = discount.ProductId
+                ProductId = discount.ProductId,
+                ProductName = discount.Product.Name
             })
             .FirstOrDefaultAsync(discount => discount.Id == id, ct);
 

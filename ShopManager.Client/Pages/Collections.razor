@@ -1,0 +1,184 @@
+@page "/collections"
+@using Microsoft.AspNetCore.Authorization
+@using ShopManager.Client.Common
+@using ShopManager.Client.Dialogs
+@using ShopManager.Client.Dtos
+@using ShopManager.Client.Requests
+@using ShopManager.Client.Services
+@attribute [Authorize]
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<CollectionDto>>>(ServerReload))"
+          Dense="true" 
+          Hover="true" 
+          @ref="_table">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">
+            Collections
+        </MudText>
+        <MudSpacer />
+        <MudTextField T="string" 
+                      ValueChanged="@(s=>OnSearch(s))" 
+                      Placeholder="Search" 
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                      IconSize="Size.Medium" 
+                      Class="mt-0"/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   StartIcon="@Icons.Material.Filled.Add" 
+                   Class="ml-4"
+                   OnClick="@AddNewCollection">
+            Add new collection
+        </MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="id"
+                               T="CollectionDto">
+                Id
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="name"
+                               T="CollectionDto">
+                Name
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="products"
+                               T="CollectionDto">
+                Products
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="users"
+                               T="CollectionDto">
+                Users
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Actions
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">
+            @context.Id
+        </MudTd>
+        <MudTd DataLabel="Name">
+            @context.Name
+        </MudTd>
+        <MudTd DataLabel="Products">
+            @context.Products.Count
+        </MudTd>
+        <MudTd DataLabel="Users">
+            @context.Users.Count
+        </MudTd>
+        <MudTd>
+            <MudTooltip Text="View">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Visibility"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               Href="@("/collections/" + context.Id.ToBase64String())"/>
+            </MudTooltip>
+            <MudTooltip Text="Edit">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Edit"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => EditCollection(context.Id))"/>
+            </MudTooltip>
+            <MudTooltip Text="Delete">
+                <MudIconButton Color="Color.Secondary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => DeleteCollection(context.Id, context.Name))"/>
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private ICollectionService CollectionService { get; set; } = null!;
+    private MudTable<CollectionDto> _table = null!;
+    private string _searchString = string.Empty;
+
+    private async Task<TableData<CollectionDto>> ServerReload(TableState state)
+    {
+        var response = await CollectionService.GetCollectionsAsync(state.Page, state.PageSize, state.SortLabel, state.SortDirection, _searchString);
+        
+        return new TableData<CollectionDto>()
+        {
+            TotalItems = response.TotalCount, 
+            Items = response.Items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _table.ReloadServerData();
+    }
+
+    private async Task AddNewCollection()
+    {
+        var dialog = await DialogService.ShowAsync<AddCollectionDialog>("Add new collection");
+        var request = await dialog.GetReturnValueAsync<AddCollectionRequest>();
+
+        if (request is not null)
+        {
+            await CollectionService.AddCollectionAsync(request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task EditCollection(Guid id)
+    {
+        var dialog = await DialogService.ShowAsync<EditCollectionDialog>("Edit collection", new DialogParameters
+        {
+            { nameof(EditCollectionDialog.CollectionId), id }
+        });
+        
+        var request = await dialog.GetReturnValueAsync<EditCollectionRequest>();
+        
+        if (request is not null)
+        {
+            await CollectionService.EditCollectionAsync(id, request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task DeleteCollection(Guid id, string name)
+    {
+        var dialog = await DialogService.ShowAsync<ConfirmDeleteDialog>(string.Empty, new DialogParameters
+        {
+            { nameof(ConfirmDeleteDialog.CorrectName), name }
+        });
+
+        var result = await dialog.GetReturnValueAsync<bool>();
+        
+        if (result)
+        {
+            await CollectionService.RemoveCollectionAsync(id);
+            await _table.ReloadServerData();
+        }
+    }
+
+}

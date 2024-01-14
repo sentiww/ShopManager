@@ -1,0 +1,56 @@
+@page "/collections/{IdBase64}"
+@attribute [Authorize]
+@using ShopManager.Client.Common
+@using ShopManager.Client.Dtos
+@using ShopManager.Client.Services
+@using Microsoft.AspNetCore.Authorization
+<MudContainer>
+    <h3>Product</h3>
+    @if (CollectionDetails is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl>
+            <dt>Id</dt>
+            <dd>@CollectionDetails.Id</dd>
+            <dt>Name</dt>
+            <dd>@CollectionDetails.Name</dd>
+            <dt>Products</dt>
+            <dd>
+                <ul>
+                    @foreach (var product in CollectionDetails.Products)
+                    {
+                        <li>@product.Name</li>
+                    }
+                </ul>
+            </dd>
+            <dt>Users</dt>
+            <dd>
+                <ul>
+                    @foreach (var user in CollectionDetails.Users)
+                    {
+                        <li>@user.UserName</li>
+                    }
+                </ul>
+            </dd>
+        </dl>
+    }
+</MudContainer>
+@code {
+    [Parameter]
+    public string IdBase64 { get; set; }
+    [Inject]
+    private ICollectionService CollectionService { get; set; } = null!;
+    private Guid Id { get; set; }
+    private CollectionDetailsDto CollectionDetails { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Id = GuidHelper.FromBase64String(IdBase64);
+        CollectionDetails = await CollectionService.GetCollectionAsync(Id);
+        await base.OnInitializedAsync();
+    }
+
+}

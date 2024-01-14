@@ -18,7 +18,7 @@ public static class CreateDiscountRequestExtensions
             Id = Guid.NewGuid(),
             ProductId = request.ProductId,
             Percentage = request.Percentage,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate
+            StartDate = request.StartDate.ToUniversalTime(),
+            EndDate = request.EndDate.ToUniversalTime()
         };
 }

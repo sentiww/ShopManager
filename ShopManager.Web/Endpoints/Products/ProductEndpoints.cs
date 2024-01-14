@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManager.Persistence;
+using ShopManager.Web.Common;
 using ShopManager.Web.Utilities;
 
 namespace ShopManager.Web.Endpoints.Products;
@@ -35,10 +36,15 @@ public static class ProductEndpoints
     }
 
     private static async Task<Ok<PagedCollection<ProductDto>>> GetProducts(
+        [FromQuery] int page,
+        [FromQuery] int pageSize,
+        [FromQuery] string? sortLabel,
+        [FromQuery] int? sortDirection,
+        [FromQuery] string? searchString,
         [FromServices] ShopManagerContext context,
         CancellationToken ct)
     {
-        var products = await context.Products
+        var query = context.Products
             .Select(product => new ProductDto
             {
                 Id = product.Id,
@@ -46,10 +52,60 @@ public static class ProductEndpoints
                 Description = product.Description,
                 Price = product.Price,
                 Quantity = product.Quantity
-            })
-            .OrderBy(product => product.Id)
-            .ToPagedCollectionAsync(1, 10, ct);
+            });
+            
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            var lowerSearchString = searchString.ToLower();
+            query = query.Where(product => product.Id.ToString().Contains(lowerSearchString) ||
+                                           product.Name.ToLower().Contains(lowerSearchString) ||
+                                           product.Description.ToLower().Contains(lowerSearchString) ||
+                                           product.Price.ToString().Contains(lowerSearchString) ||
+                                           product.Quantity.ToString().Contains(lowerSearchString));
+        }
 
+        var orderDirection = SortDirection.Ascending;
+        if (sortDirection.HasValue)
+        {
+            orderDirection = (SortDirection)sortDirection.Value;
+        }
+        
+        if (!string.IsNullOrWhiteSpace(sortLabel))
+        {
+            switch (orderDirection)
+            {
+                case SortDirection.None:
+                    break;
+                case SortDirection.Ascending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderBy(product => product.Id),
+                        "name" => query.OrderBy(product => product.Name),
+                        "description" => query.OrderBy(product => product.Description),
+                        "price" => query.OrderBy(product => product.Price),
+                        "quantity" => query.OrderBy(product => product.Quantity),
+                        _ => query
+                    };
+                    break;
+                case SortDirection.Descending:
+                    query = sortLabel switch
+                    {
+                        "id" => query.OrderByDescending(product => product.Id),
+                        "name" => query.OrderByDescending(product => product.Name),
+                        "description" => query.OrderByDescending(product => product.Description),
+                        "price" => query.OrderByDescending(product => product.Price),
+                        "quantity" => query.OrderByDescending(product => product.Quantity),
+                        _ => query
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(sortDirection), sortDirection, null);
+            }
+        }
+    
+        var products = await query
+            .ToPagedCollectionAsync(page, pageSize, ct);
+        
         return TypedResults.Ok(products);
     }
 

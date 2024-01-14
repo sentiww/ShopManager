@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<MudNavMenu>
+    <MudText Typo="Typo.h6"
+             Class="px-4">
+        Shop Manager
+    </MudText>
+    <MudText Typo="Typo.body2"
+             Class="px-4 mud-text-secondary">
+        Manage your shop easily
+    </MudText>
+    <MudDivider Class="my-2"/>
+    <MudNavLink Href="/">
+        Home
+    </MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/products">
+                Products
+            </MudNavLink>
+            <MudNavLink Href="/collections">
+                Collections
+            </MudNavLink>
+            <MudNavLink Href="/discounts">
+                Discounts
+            </MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+</MudNavMenu>

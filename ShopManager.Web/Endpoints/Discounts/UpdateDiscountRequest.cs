@@ -15,7 +15,7 @@ public static class UpdateDiscountRequestExtensions
     public static void UpdateEntity(this UpdateDiscountRequest request, DiscountEntity entity)
     {
         entity.Percentage = request.Percentage;
-        entity.StartDate = request.StartDate;
-        entity.EndDate = request.EndDate;
+        entity.StartDate = request.StartDate.ToUniversalTime();
+        entity.EndDate = request.EndDate.ToUniversalTime();
     }
 }

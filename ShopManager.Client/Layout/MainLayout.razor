@@ -1,0 +1,103 @@
+﻿@using ShopManager.Client.Dialogs
+@using ShopManager.Client.Requests
+@using ShopManager.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                       Color="Color.Inherit" 
+                       Edge="Edge.Start" 
+                       OnClick="@DrawerToggle" />
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu FullWidth="true"
+                         AnchorOrigin="Origin.BottomCenter"
+                         TransformOrigin="Origin.BottomCenter">
+                    <ActivatorContent>
+                        <MudChip Icon="@Icons.Material.Filled.Person"
+                                 Color="Color.Primary">
+                            @context.User.Identity?.Name
+                        </MudChip>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem OnClick="@Logout">
+                            Logout
+                        </MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Color="Color.Inherit"
+                           Variant="Variant.Text"
+                           OnClick="@Login">
+                    Login
+                </MudButton>
+                <MudButton Color="Color.Inherit"
+                           Variant="Variant.Text"
+                           OnClick="@Register">
+                    Register
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" 
+               Elevation="2">
+        <NavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+   [Inject]
+   private IUserService UserService { get; set; }
+   [Inject]
+   private IDialogService DialogService { get; set; }
+    
+    bool _drawerOpen = true;
+    
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+    
+    private async Task Login()
+    {
+        var result = await DialogService.ShowAsync<LoginDialog>("Login");
+        
+        var loginRequest = await result.GetReturnValueAsync<LoginRequest>();
+        
+        if (loginRequest is not null)
+        {
+            await UserService.LoginAsync(loginRequest);
+            StateHasChanged();
+        }
+    }
+
+    private async Task Register()
+    {
+        var result = await DialogService.ShowAsync<RegisterDialog>("Register");
+
+        var registerRequest = await result.GetReturnValueAsync<RegisterRequest>();
+
+        if (registerRequest is not null)
+        {
+            await UserService.RegisterAsync(registerRequest);
+        }
+    }
+    
+    private async Task Logout()
+    {
+        await UserService.LogoutAsync();
+        StateHasChanged();
+    }
+
+}

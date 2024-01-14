@@ -1,4 +1,13 @@
 ﻿services:
+  shopmanager.client:
+    image: shopmanager.client
+    build:
+      context: .
+      dockerfile: ShopManager.Client/Dockerfile
+    ports:
+      - "3000:80"
+    networks:
+      - proxynet
   shopmanager.web:
     image: shopmanager.web
     build:

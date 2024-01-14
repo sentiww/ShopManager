@@ -1,0 +1,52 @@
+@page "/discounts/{IdBase64}"
+@attribute [Authorize]
+@using ShopManager.Client.Common
+@using ShopManager.Client.Dtos
+@using ShopManager.Client.Services
+@using Microsoft.AspNetCore.Authorization
+<MudContainer>
+    <h3>Discount</h3>
+    @if (DiscountDetails is null || ProductDetails is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl>
+            <dt>Id</dt>
+            <dd>@DiscountDetails.Id</dd>
+            <dt>Percentage</dt>
+            <dd>@DiscountDetails.Percentage</dd>
+            <dt>Start date</dt>
+            <dd>@DiscountDetails.StartDate</dd>
+            <dt>End date</dt>
+            <dd>@DiscountDetails.EndDate</dd>
+            <dt>Product name</dt>
+            <dd>@ProductDetails.Name</dd>
+            <dt>Product price</dt>
+            <dd>@ProductDetails.Price</dd>
+            <dt>Discounted price</dt>
+            <dd>@(Math.Round(ProductDetails.Price * (1 - DiscountDetails.Percentage * 0.01m), 2))</dd>
+        </dl>
+    }
+</MudContainer>
+@code {
+    [Parameter]
+    public string IdBase64 { get; set; }
+    [Inject]
+    private IDiscountService DiscountService { get; set; } = null!;
+    [Inject]
+    private IProductService ProductService { get; set; } = null!;
+    private Guid Id { get; set; }
+    private DiscountDto DiscountDetails { get; set; }
+    private ProductDetailsDto ProductDetails { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Id = GuidHelper.FromBase64String(IdBase64);
+        DiscountDetails = await DiscountService.GetDiscountAsync(Id);
+        ProductDetails = await ProductService.GetProductAsync(DiscountDetails.ProductId);
+        await base.OnInitializedAsync();
+    }
+
+}

@@ -1,0 +1,104 @@
+@using ShopManager.Client.Validators
+@using ShopManager.Client.Models
+@using ShopManager.Client.Services
+<MudDialog Options="@_options">
+    <DialogContent>
+        @if (_model is not null)
+        {
+            <MudForm Model="@_model"
+                     @ref="_form"
+                     Validation="@_validator.ValidateValue"
+                     ValidationDelay="0">
+                <MudTextField @bind-Value="@_model.Name"
+                              For="@(() => _model.Name)"
+                              Immediate="true"
+                              Label="Name"/>
+                <MudTextField @bind-Value="@_model.Description"
+                              For="@(() => _model.Description)"
+                              Immediate="true"
+                              Label="Description"
+                              Lines="5"/>
+                <MudNumericField @bind-Value="@_model.Price"
+                                 For="@(() => _model.Price)"
+                                 Immediate="true"
+                                 Label="Price"
+                                 Min="0"/>
+                <MudNumericField @bind-Value="@_model.Quantity"
+                                 For="@(() => _model.Quantity)"
+                                 Immediate="true"
+                                 Label="Quantity"
+                                 Min="0"/>
+            </MudForm>
+        }
+        else
+        {
+            <MudTypography>
+                Loading...
+            </MudTypography>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="@EditProduct">
+            Edit
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    [Parameter]
+    public Guid ProductId { get; set; }
+    [Inject]
+    private IProductService ProductService { get; set; } = null!;
+    private readonly DialogOptions _options = new ()
+    {
+        CloseButton = true,
+        DisableBackdropClick = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small,
+        FullScreen = false,
+        Position = DialogPosition.Center
+    };
+    private readonly EditProductModelValidator _validator = new();
+    private MudForm _form = null!;
+    private EditProductModel _model = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var product = await ProductService.GetProductAsync(ProductId);
+        _model = new EditProductModel
+        {
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            Quantity = product.Quantity
+        };
+        await base.OnInitializedAsync();
+    }
+
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+    
+    private void EditProduct()
+    {
+        _form.Validate();
+        
+        if (!_validator.Validate(_model).IsValid)
+        {
+            return;
+        }
+        
+        Dialog.Close(DialogResult.Ok(_model.ToRequest()));
+    }
+}

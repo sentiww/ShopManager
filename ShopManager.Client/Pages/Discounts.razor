@@ -1,0 +1,193 @@
+@page "/discounts"
+@using Microsoft.AspNetCore.Authorization
+@using ShopManager.Client.Common
+@using ShopManager.Client.Dialogs
+@using ShopManager.Client.Dtos
+@using ShopManager.Client.Requests
+@using ShopManager.Client.Services
+@attribute [Authorize]
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<DiscountDto>>>(ServerReload))"
+          Dense="true" 
+          Hover="true" 
+          @ref="_table">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">
+            Discounts
+        </MudText>
+        <MudSpacer />
+        <MudTextField T="string" 
+                      ValueChanged="@(s=>OnSearch(s))" 
+                      Placeholder="Search" 
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                      IconSize="Size.Medium" 
+                      Class="mt-0"/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   StartIcon="@Icons.Material.Filled.Add" 
+                   Class="ml-4"
+                   OnClick="@AddNewDiscount">
+            Add new discount
+        </MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="id"
+                               T="DiscountDto">
+                Id
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="productName"
+                               T="DiscountDto">
+                Product name
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="percentage"
+                               T="DiscountDto">
+                Percentage
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="starts"
+                               T="DiscountDto">
+                Starts
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="ends"
+                               T="DiscountDto">
+                Ends
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Actions
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">
+            @context.Id
+        </MudTd>
+        <MudTd DataLabel="Product name">
+            @context.ProductName
+        </MudTd>
+        <MudTd DataLabel="Percentage">
+            @context.Percentage
+        </MudTd>
+        <MudTd DataLabel="Start date">
+            @context.StartDate.ToShortDateString()
+        </MudTd>
+        <MudTd DataLabel="End date">
+            @context.EndDate.ToShortDateString()
+        </MudTd>
+        <MudTd>
+            <MudTooltip Text="View">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Visibility"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               Href="@("/discounts/" + context.Id.ToBase64String())"/>
+            </MudTooltip>
+            <MudTooltip Text="Edit">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Edit"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => EditDiscount(context.Id))"/>
+            </MudTooltip>
+            <MudTooltip Text="Delete">
+                <MudIconButton Color="Color.Secondary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => DeleteDiscount(context.Id, $"{context.ProductName} -{context.Percentage}%"))"/>
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private IDiscountService DiscountService { get; set; } = null!;
+    private MudTable<DiscountDto> _table = null!;
+    private string _searchString = string.Empty;
+
+    private async Task<TableData<DiscountDto>> ServerReload(TableState state)
+    {
+        var response = await DiscountService.GetDiscountsAsync(state.Page, state.PageSize, state.SortLabel, state.SortDirection, _searchString);
+        
+        return new TableData<DiscountDto>
+        {
+            TotalItems = response.TotalCount, 
+            Items = response.Items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _table.ReloadServerData();
+    }
+
+    private async Task AddNewDiscount()
+    {
+        var dialog = await DialogService.ShowAsync<AddDiscountDialog>("Add new discount");
+        var request = await dialog.GetReturnValueAsync<AddDiscountRequest>();
+
+        if (request is not null)
+        {
+            await DiscountService.AddDiscountAsync(request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task EditDiscount(Guid id)
+    {
+        var dialog = await DialogService.ShowAsync<EditDiscountDialog>("Edit discount", new DialogParameters
+        {
+            { nameof(EditDiscountDialog.DiscountId), id }
+        });
+        
+        var request = await dialog.GetReturnValueAsync<EditDiscountRequest>();
+        
+        if (request is not null)
+        {
+            await DiscountService.EditDiscountAsync(id, request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task DeleteDiscount(Guid id, string name)
+    {
+        var dialog = await DialogService.ShowAsync<ConfirmDeleteDialog>(string.Empty, new DialogParameters
+        {
+            { nameof(ConfirmDeleteDialog.CorrectName), name }
+        });
+
+        var result = await dialog.GetReturnValueAsync<bool>();
+        
+        if (result)
+        {
+            await DiscountService.RemoveDiscountAsync(id);
+            await _table.ReloadServerData();
+        }
+    }
+
+}

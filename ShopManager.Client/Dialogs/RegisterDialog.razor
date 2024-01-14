@@ -1,0 +1,76 @@
+@using ShopManager.Client.Validators
+@using ShopManager.Client.Models
+<MudDialog Options="@_options">
+    <DialogContent>
+        <MudForm @ref="_form" 
+                 Model="@_model"
+                 Validation="@_validator.ValidateValue"
+                 ValidationDelay="0">
+            <MudTextField @bind-Value="@_model.UserName"
+                          For="@(() => _model.UserName)"
+                          Immediate="true"
+                          Label="UserName"/>
+            <MudTextField @bind-Value="@_model.Email"
+                          For="@(() => _model.Email)"
+                          Immediate="true"
+                          Label="Email"
+                          InputType="InputType.Email"/>
+            <MudTextField @bind-Value="@_model.Password"
+                          For="@(() => _model.Password)"
+                          Immediate="true"
+                          Label="Password"
+                          InputType="InputType.Password"/>
+            <MudTextField @bind-Value="@_model.ConfirmPassword"
+                          For="@(() => _model.ConfirmPassword)"
+                          Immediate="true"
+                          Label="Confirm Password"
+                          InputType="InputType.Password"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="@Register">
+            Register
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    private readonly DialogOptions _options = new ()
+    {
+        CloseButton = true,
+        DisableBackdropClick = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small,
+        FullScreen = false,
+        Position = DialogPosition.Center
+    };
+    private readonly RegisterModelValidator _validator = new();
+    private MudForm _form = null!;
+    private readonly RegisterModel _model = new();
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+    
+    private void Register()
+    {
+        _form.Validate();
+
+        if (!_validator.Validate(_model).IsValid)
+        {
+            return;
+        }
+        
+        Dialog.Close(DialogResult.Ok(_model.ToRequest()));
+    }
+}

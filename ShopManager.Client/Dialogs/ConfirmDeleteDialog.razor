@@ -1,0 +1,59 @@
+@using ShopManager.Client.Models
+@using ShopManager.Client.Validators
+<MudDialog Options="@_options"
+           OnBackdropClick="@(() => { })">
+    <DialogContent>
+        <MudText>
+            Are you sure you want to delete <span style="color: red">@CorrectName</span>?
+            Please type the full name to confirm.
+        </MudText>
+        <MudTextField @bind-Value="@_model.Name"
+                      For="@(() => _model.Name)"
+                      Immediate="true"
+                      Label="Name"
+                      Placeholder="@CorrectName"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Filled"
+                   Disabled="@(!_validator.Validate(_model).IsValid)" 
+                   OnClick="@Delete">
+            Delete
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string CorrectName { get; set; }
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    private readonly DialogOptions _options = new()
+    {
+        CloseButton = false,
+        DisableBackdropClick = true,
+        CloseOnEscapeKey = false,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small
+    };
+    private ConfirmDeleteModel _model;
+    private ConfirmDeleteModelValidator _validator;
+    protected override void OnInitialized()
+    {
+        _model = new ()
+        {
+            Name = string.Empty
+        };
+        _validator = new ConfirmDeleteModelValidator(CorrectName);
+        base.OnInitialized();
+    }
+
+    private void Cancel() => Dialog.Close(DialogResult.Ok(false));
+    private void Delete() => Dialog.Close(DialogResult.Ok(true));
+}

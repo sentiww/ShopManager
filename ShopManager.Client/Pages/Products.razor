@@ -1,0 +1,184 @@
+@page "/products"
+@attribute [Authorize]
+@using ShopManager.Client.Services
+@using ShopManager.Client.Dtos
+@using ShopManager.Client.Dialogs
+@using ShopManager.Client.Requests
+@using ShopManager.Client.Common
+@using Microsoft.AspNetCore.Authorization
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<ProductDto>>>(ServerReload))"
+          Dense="true" 
+          Hover="true" 
+          @ref="_table">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">
+            Products
+        </MudText>
+        <MudSpacer />
+        <MudTextField T="string" 
+                      ValueChanged="@(s=>OnSearch(s))" 
+                      Placeholder="Search" 
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                      IconSize="Size.Medium" 
+                      Class="mt-0"/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   StartIcon="@Icons.Material.Filled.Add" 
+                   Class="ml-4"
+                   OnClick="@AddNewProduct">
+            Add new product
+        </MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="id"
+                               T="ProductDto">
+                Id
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="name"
+                               T="ProductDto">
+                Name
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="price"
+                               T="ProductDto">
+                Price
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="quantity"
+                               T="ProductDto">
+                Quantity
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Actions
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">
+            @context.Id
+        </MudTd>
+        <MudTd DataLabel="Name">
+            @context.Name
+        </MudTd>
+        <MudTd DataLabel="Price">
+            @context.Price
+        </MudTd>
+        <MudTd DataLabel="Quantity">
+            @context.Quantity
+        </MudTd>
+        <MudTd>
+            <MudTooltip Text="View">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Visibility"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               Href="@("/products/" + context.Id.ToBase64String())"/>
+            </MudTooltip>
+            <MudTooltip Text="Edit">
+                <MudIconButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Edit"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => EditProduct(context.Id))"/>
+            </MudTooltip>
+            <MudTooltip Text="Delete">
+                <MudIconButton Color="Color.Secondary"
+                               Variant="Variant.Filled"
+                               Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Class="mr-2"
+                               OnClick="@(() => DeleteProduct(context.Id, context.Name))"/>
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private IProductService ProductService { get; set; } = null!;
+    private MudTable<ProductDto> _table = null!;
+    private string _searchString = string.Empty;
+
+    private async Task<TableData<ProductDto>> ServerReload(TableState state)
+    {
+        var response = await ProductService.GetProductsAsync(state.Page, state.PageSize, state.SortLabel, state.SortDirection, _searchString);
+        
+        return new TableData<ProductDto>()
+        {
+            TotalItems = response.TotalCount, 
+            Items = response.Items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _table.ReloadServerData();
+    }
+
+    private async Task AddNewProduct()
+    {
+        var dialog = await DialogService.ShowAsync<AddProductDialog>("Add new product");
+        var request = await dialog.GetReturnValueAsync<AddProductRequest>();
+
+        if (request is not null)
+        {
+            await ProductService.AddProductAsync(request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task EditProduct(Guid id)
+    {
+        var dialog = await DialogService.ShowAsync<EditProductDialog>("Edit product", new DialogParameters
+        {
+            { nameof(EditProductDialog.ProductId), id }
+        });
+        
+        var request = await dialog.GetReturnValueAsync<EditProductRequest>();
+        
+        if (request is not null)
+        {
+            await ProductService.EditProductAsync(id, request);
+            await _table.ReloadServerData();
+        }
+    }
+
+    private async Task DeleteProduct(Guid id, string name)
+    {
+        var dialog = await DialogService.ShowAsync<ConfirmDeleteDialog>(string.Empty, new DialogParameters
+        {
+            { nameof(ConfirmDeleteDialog.CorrectName), name }
+        });
+
+        var result = await dialog.GetReturnValueAsync<bool>();
+        
+        if (result)
+        {
+            await ProductService.RemoveProductAsync(id);
+            await _table.ReloadServerData();
+        }
+    }
+
+}

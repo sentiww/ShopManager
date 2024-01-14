@@ -202,4 +202,21 @@ public static class ShopManagerContextUtilities
         context.RemoveRange(context.Products);
         await context.SaveChangesAsync();
     }
+
+    public static async Task CheckConnectionAsync(ShopManagerContext context)
+    {
+        for (var i = 0; i < 5; i++)
+        {
+            var canConnect = await context.Database.CanConnectAsync();
+
+            if (canConnect)
+            {
+                return;
+            }
+
+            await Task.Delay(i * i * 1000);
+        }
+        
+        throw new Exception("Cannot connect to database");
+    }
 }

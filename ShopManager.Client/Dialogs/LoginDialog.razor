@@ -1,0 +1,56 @@
+@using ShopManager.Client.Models
+<MudDialog Options="@_options">
+    <DialogContent>
+        <MudForm @ref="_form" 
+                 Model="@_model">
+            <MudTextField @bind-Value="@_model.Email"
+                          For="@(() => _model.Email)"
+                          Immediate="true"
+                          Label="Email"
+                          InputType="InputType.Email"/>
+            <MudTextField @bind-Value="@_model.Password"
+                          For="@(() => _model.Password)"
+                          Immediate="true"
+                          Label="Password"
+                          InputType="InputType.Password"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="@Login">
+            Login
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    private readonly DialogOptions _options = new ()
+    {
+        CloseButton = true,
+        DisableBackdropClick = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small,
+        FullScreen = false,
+        Position = DialogPosition.Center
+    };
+    private MudForm _form = null!;
+    private readonly LoginModel _model = new();
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+    
+    private void Login()
+    {
+        Dialog.Close(DialogResult.Ok(_model.ToRequest()));
+    }
+}

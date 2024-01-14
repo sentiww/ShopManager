@@ -1,0 +1,213 @@
+@using ShopManager.Client.Validators
+@using ShopManager.Client.Models
+@using ShopManager.Client.Services
+<MudDialog Options="@_options">
+    <DialogContent>
+        @if (_model is not null)
+        {
+            <MudForm Model="@_model"
+                     @ref="_form"
+                     Validation="@_validator.ValidateValue"
+                     ValidationDelay="0">
+                <MudTextField @bind-Value="@_model.Name"
+                              For="@(() => _model.Name)"
+                              Immediate="true"
+                              Label="Name"/>
+                <MudAutocomplete T="Guid" 
+                                 Label="Products" 
+                                 Value="@_autoCompleteProductValue"
+                                 ValueChanged="@OnAutoCompleteProductValueChanged"
+                                 SearchFunc="@SearchProducts"
+                                 ToStringFunc="@(value => ProductIdToString(value))"/>
+                @foreach (var (productId, productName) in ModelProductNames)
+                {
+                    <MudChip Variant="Variant.Filled" 
+                             Color="Color.Primary" 
+                             Icon="@Icons.Material.Filled.Close"
+                             OnClick="@(() => RemoveProduct(productId))">
+                        @productName
+                    </MudChip>
+                }
+                <MudAutocomplete T="string" 
+                                 Label="Users" 
+                                 Value="@_autoCompleteUserValue"
+                                 ValueChanged="@OnAutoCompleteUserValueChanged"
+                                 SearchFunc="@SearchUsers"
+                                 ToStringFunc="@(value => UserIdToString(value))"/>
+                @foreach (var (userId, userName) in ModelUserNames)
+                {
+                    <MudChip Variant="Variant.Filled" 
+                             Color="Color.Primary" 
+                             Icon="@Icons.Material.Filled.Close"
+                             OnClick="@(() => RemoveUser(userId))">
+                        @userName
+                    </MudChip>
+                }
+            </MudForm>
+        }
+        else
+        {
+            <MudTypography>
+                Loading...
+            </MudTypography>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="@EditCollection">
+            Edit
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    [Parameter]
+    public Guid CollectionId { get; set; }
+    [Inject]
+    private ICollectionService CollectionService { get; set; } = null!;
+    [Inject]
+    private IProductService ProductService { get; set; } = null!;
+    [Inject]
+    private IUserService UserService { get; set; } = null!;
+    private readonly DialogOptions _options = new ()
+    {
+        CloseButton = true,
+        DisableBackdropClick = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small,
+        FullScreen = false,
+        Position = DialogPosition.Center
+    };
+    private readonly EditCollectionModelValidator _validator = new();
+    private MudForm _form = null!;
+    private EditCollectionModel _model = null!;
+    private Dictionary<Guid, string> ModelProductNames { get; set; }
+    private Dictionary<Guid, string> ProductNames { get; set; }
+    private Dictionary<string, string> ModelUserNames { get; set; }
+    private Dictionary<string, string> UserNames { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var collection = await CollectionService.GetCollectionAsync(CollectionId);
+        _model = new EditCollectionModel
+        {
+            Name = collection.Name,
+            ProductIds = collection.Products
+                .Select(product => product.Id)
+                .ToArray(),
+            UserIds = collection.Users
+                .Select(user => user.Id)
+                .ToArray()
+        };
+        ModelProductNames = collection.Products
+            .ToDictionary(product => product.Id, product => product.Name);
+        ModelUserNames = collection.Users
+            .ToDictionary(user => user.Id, user => user.UserName);
+        await base.OnInitializedAsync();
+    }
+
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+    
+    private void EditCollection()
+    {
+        _form.Validate();
+        
+        if (!_validator.Validate(_model).IsValid)
+        {
+            return;
+        }
+        
+        Dialog.Close(DialogResult.Ok(_model.ToRequest()));
+    }
+
+    private Guid _autoCompleteProductValue;
+    private async Task OnAutoCompleteProductValueChanged(Guid value)
+    {
+        _model.ProductIds = _model.ProductIds
+            .Append(value)
+            .ToArray();
+        
+        if (!ModelProductNames.ContainsKey(value))
+        {
+            var product = await ProductService.GetProductAsync(value);
+            ModelProductNames.Add(product.Id, product.Name);
+        }
+        
+        _autoCompleteProductValue = value;
+    }
+    
+    private async Task<IEnumerable<Guid>> SearchProducts(string searchText)
+    {
+        var products = await ProductService.GetProductsAsync(0, 5, null, null, searchText);
+        ProductNames = products.Items
+            .Where(item => !ModelProductNames.ContainsKey(item.Id))
+            .ToDictionary(product => product.Id, product => product.Name);
+        return ProductNames.Keys;
+    }
+
+    private string ProductIdToString(Guid id)
+    {
+        return ProductNames[id];
+    }
+
+    private void RemoveProduct(Guid productId)
+    {
+        ModelProductNames.Remove(productId);
+        _model.ProductIds = _model.ProductIds
+            .Where(id => id != productId)
+            .ToArray();
+        StateHasChanged();
+    }
+
+    private string _autoCompleteUserValue;
+    private async Task OnAutoCompleteUserValueChanged(string value)
+    {
+        _model.UserIds = _model.UserIds
+            .Append(value)
+            .ToArray();
+        
+        if (!ModelUserNames.ContainsKey(value))
+        {
+            var user = await UserService.GetUserAsync(value);
+            ModelUserNames.Add(user.Id, user.UserName);
+        }
+        
+        _autoCompleteUserValue = value;
+    }
+    
+    private async Task<IEnumerable<string>> SearchUsers(string searchText)
+    {
+        var users = await UserService.GetUsersAsync(0, 5, searchText);
+        UserNames = users.Items
+            .Where(item => !ModelUserNames.ContainsKey(item.Id))
+            .ToDictionary(user => user.Id, product => product.UserName);
+        return UserNames.Keys;
+    }
+
+    private string UserIdToString(string id)
+    {
+        return UserNames[id];
+    }
+
+    private void RemoveUser(string userId)
+    {
+        ModelUserNames.Remove(userId);
+        _model.UserIds = _model.UserIds
+            .Where(id => id != userId)
+            .ToArray();
+        StateHasChanged();
+    }
+
+}

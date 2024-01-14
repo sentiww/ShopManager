@@ -11,8 +11,11 @@ public class ShopManagerContext : IdentityDbContext<ShopManagerUserEntity>
     public DbSet<ProductEntity> Products { get; set; } = null!;
     public DbSet<DiscountEntity> Discounts { get; set; } = null!;
     public DbSet<CollectionEntity> Collections { get; set; } = null!;
-    
-    public ShopManagerContext(DbContextOptions<ShopManagerContext> options) : base(options) { }
+
+    public ShopManagerContext(DbContextOptions<ShopManagerContext> options) : base(options)
+    {
+        
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

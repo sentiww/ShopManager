@@ -1,0 +1,88 @@
+@using ShopManager.Client.Validators
+@using ShopManager.Client.Models
+@using ShopManager.Client.Services
+<MudDialog Options="@_options">
+    <DialogContent>
+        <MudForm Model="@_model"
+                 @ref="_form"
+                 Validation="@_validator.ValidateValue"
+                 ValidationDelay="0">
+            <MudNumericField @bind-Value="@_model.Percentage"
+                             For="@(() => _model.Percentage)"
+                             Immediate="true"
+                             Label="Percentage"
+                             Min="1"
+                             Max="100"/>
+            <MudDateRangePicker @bind-DateRange="@_model.StartEndDate"
+                                Label="Start to end date"/>
+            <MudAutocomplete T="Guid" 
+                             Label="Product" 
+                             @bind-Value="@_model.ProductId" 
+                             SearchFunc="@SearchProducts"
+                             ToStringFunc="@(value => ProductIdToString(value))"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" 
+                   Variant="Variant.Outlined" 
+                   OnClick="@Cancel">
+            Cancel
+        </MudButton>
+        <MudSpacer/>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="@AddDiscount">
+            Add
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; } = null!;
+    [Inject]
+    private IProductService ProductService { get; set; } = null!;
+    private readonly DialogOptions _options = new ()
+    {
+        CloseButton = true,
+        DisableBackdropClick = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Small,
+        FullScreen = false,
+        Position = DialogPosition.Center
+    };
+    private readonly AddDiscountModelValidator _validator = new();
+    private MudForm _form = null!;
+    private readonly AddDiscountModel _model = new();
+    private Dictionary<Guid, string> ProductNames { get; set; }
+
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+    
+    private void AddDiscount()
+    {
+        _form.Validate();
+        
+        if (!_validator.Validate(_model).IsValid)
+        {
+            return;
+        }
+        
+        Dialog.Close(DialogResult.Ok(_model.ToRequest()));
+    }
+
+    private async Task<IEnumerable<Guid>> SearchProducts(string searchText)
+    {
+        var products = await ProductService.GetProductsAsync(0, 5, null, null, searchText);
+        ProductNames = products.Items.ToDictionary(product => product.Id, product => product.Name);
+        return ProductNames.Keys;
+    }
+
+    private string ProductIdToString(Guid id)
+    {
+        return ProductNames[id];
+    }
+
+}
