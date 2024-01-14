@@ -1,8 +1,11 @@
 @using ShopManager.Client.Models
+@using ShopManager.Client.Validators
 <MudDialog Options="@_options">
     <DialogContent>
         <MudForm @ref="_form" 
-                 Model="@_model">
+                 Model="@_model"
+                 Validation="@_validator.ValidateValue"
+                 ValidationDelay="0">
             <MudTextField @bind-Value="@_model.Email"
                           For="@(() => _model.Email)"
                           Immediate="true"
@@ -44,6 +47,7 @@
     };
     private MudForm _form = null!;
     private readonly LoginModel _model = new();
+    private readonly LoginModelValidator _validator = new();
     private void Cancel()
     {
         Dialog.Cancel();
@@ -51,6 +55,13 @@
     
     private void Login()
     {
+        _form.Validate();
+
+        if (!_validator.Validate(_model).IsValid)
+        {
+            return;
+        }
+        
         Dialog.Close(DialogResult.Ok(_model.ToRequest()));
     }
 }

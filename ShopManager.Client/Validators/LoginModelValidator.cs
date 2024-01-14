@@ -3,18 +3,14 @@ using ShopManager.Client.Models;
 
 namespace ShopManager.Client.Validators;
 
-public class RegisterModelValidator : AbstractValidator<RegisterModel>
+public class LoginModelValidator : AbstractValidator<LoginModel>
 {
-    public RegisterModelValidator()
+    public LoginModelValidator()
     {
-        RuleFor(request => request.UserName)
-            .NotEmpty()
-            .Length(1, 100);
-
-        RuleFor(request => request.Email)
+        RuleFor(model => model.Email)
             .NotEmpty()
             .EmailAddress();
-        
+
         RuleFor(model => model.Password)
             .NotEmpty()
             .MinimumLength(8)
@@ -22,15 +18,11 @@ public class RegisterModelValidator : AbstractValidator<RegisterModel>
             .Must(password => password.Any(char.IsUpper))
             .Must(password => password.Any(char.IsLower))
             .Must(password => password.Any(char.IsNumber));
-        
-        RuleFor(request => request.ConfirmPassword)
-            .Equal(request => request.Password)
-            .WithMessage("Passwords must match.");
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
     {
-        var result = await ValidateAsync(ValidationContext<RegisterModel>.CreateWithOptions((RegisterModel)model,
+        var result = await ValidateAsync(ValidationContext<LoginModel>.CreateWithOptions((LoginModel)model,
             strategy => strategy.IncludeProperties(propertyName)));
         if (result.IsValid)
             return Array.Empty<string>();
