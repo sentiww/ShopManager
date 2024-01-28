@@ -1,6 +1,8 @@
-﻿services:
-  shopmanager.client:
-    image: shopmanager.client
+﻿version: '3.8'
+
+services:
+  shopmanagerclient:
+    image: shopmanagerclient
     build:
       context: .
       dockerfile: ShopManager.Client/Dockerfile
@@ -8,18 +10,18 @@
       - "3000:80"
     networks:
       - proxynet
-  shopmanager.web:
-    image: shopmanager.web
+  shopmanagerweb:
+    image: shopmanagerweb
     build:
       context: .
       dockerfile: ShopManager.Web/Dockerfile
     environment:
-        ConnectionStrings__DefaultConnection: Host=shopmanager.postgres;Port=5432;Database=shopmanager;Username=postgres;Password=postgres
+      ConnectionStrings__DefaultConnection: Host=shopmanagerpostgres;Port=5432;Database=shopmanager;Username=postgres;Password=postgres
     ports:
       - "8000:8080"
     networks:
       - proxynet
-  shopmanager.postgres:
+  shopmanagerpostgres:
     image: postgres
     environment:
       POSTGRES_USER: postgres
@@ -29,7 +31,7 @@
       - "5432:5432"
     networks:
       - proxynet
-  shopmanager.pgadmin:
+  shopmanagerpgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: contact@senti.dev

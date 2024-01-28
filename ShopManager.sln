@@ -11,7 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Persistence", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Client", "ShopManager.Client\ShopManager.Client.csproj", "{00550586-8FEC-47A4-A22B-895AC57F03E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Web.Tests", "ShopManager.Web.Tests\ShopManager.Web.Tests.csproj", "{713B0C00-9E92-44D2-8640-EF7B45E26FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Web.IntegrationTests", "ShopManager.Web.IntegrationTests\ShopManager.Web.IntegrationTests.csproj", "{713B0C00-9E92-44D2-8640-EF7B45E26FBC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Web.SeleniumTests", "ShopManager.Web.SeleniumTests\ShopManager.Web.SeleniumTests.csproj", "{F2E34AC0-7364-4706-9106-3EB1529B3218}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,5 +37,9 @@ Global
 		{713B0C00-9E92-44D2-8640-EF7B45E26FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{713B0C00-9E92-44D2-8640-EF7B45E26FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{713B0C00-9E92-44D2-8640-EF7B45E26FBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E34AC0-7364-4706-9106-3EB1529B3218}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E34AC0-7364-4706-9106-3EB1529B3218}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E34AC0-7364-4706-9106-3EB1529B3218}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E34AC0-7364-4706-9106-3EB1529B3218}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
