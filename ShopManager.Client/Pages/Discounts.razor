@@ -5,6 +5,7 @@
 @using ShopManager.Client.Dtos
 @using ShopManager.Client.Requests
 @using ShopManager.Client.Services
+@using ShopManager.Common.Contracts
 @attribute [Authorize]
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<DiscountDto>>>(ServerReload))"
@@ -77,10 +78,10 @@
             @context.Percentage
         </MudTd>
         <MudTd DataLabel="Start date">
-            @context.StartDate.ToShortDateString()
+            @context.StartDate.Date.ToShortDateString()
         </MudTd>
         <MudTd DataLabel="End date">
-            @context.EndDate.ToShortDateString()
+            @context.EndDate.Date.ToShortDateString()
         </MudTd>
         <MudTd>
             <MudTooltip Text="View">

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace ShopManager.Web.Utilities;
+namespace ShopManager.Common.Utilities;
 
 public sealed class PagedCollection<TSource>
 {

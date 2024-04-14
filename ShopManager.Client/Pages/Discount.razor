@@ -4,6 +4,7 @@
 @using ShopManager.Client.Dtos
 @using ShopManager.Client.Services
 @using Microsoft.AspNetCore.Authorization
+@using ShopManager.Common.Contracts
 <MudContainer>
     <h3>Discount</h3>
     @if (DiscountDetails is null || ProductDetails is null)
@@ -39,7 +40,7 @@
     private IProductService ProductService { get; set; } = null!;
     private Guid Id { get; set; }
     private DiscountDto DiscountDetails { get; set; }
-    private ProductDetailsDto ProductDetails { get; set; }
+    private ProductDto ProductDetails { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

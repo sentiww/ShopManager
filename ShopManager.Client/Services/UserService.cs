@@ -9,6 +9,8 @@ using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
 using ShopManager.Client.Providers;
 using ShopManager.Client.Requests;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
 
@@ -18,7 +20,7 @@ public interface IUserService
     public Task<JwtDto> LoginAsync(LoginRequest request);
     public Task LogoutAsync();
     public Task<UserDto> GetUserAsync(string id);
-    public Task<PaginatedResonse<UserDto>> GetUsersAsync(int page, int pageSize, string? searchString);
+    public Task<PagedCollection<UserDto>> GetUsersAsync(int page, int pageSize, string? searchString);
 }
 
 internal sealed class UserService : IUserService
@@ -86,7 +88,7 @@ internal sealed class UserService : IUserService
         return user;
     }
 
-    public async Task<PaginatedResonse<UserDto>> GetUsersAsync(int page, int pageSize, string? searchString)
+    public async Task<PagedCollection<UserDto>> GetUsersAsync(int page, int pageSize, string? searchString)
     {
         var query = new Dictionary<string, string?>
         {
@@ -101,7 +103,7 @@ internal sealed class UserService : IUserService
         
         var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("http://localhost:8000/api/v1/users", query)); 
         
-        var users = await response.Content.ReadFromJsonAsync<PaginatedResonse<UserDto>>();
+        var users = await response.Content.ReadFromJsonAsync<PagedCollection<UserDto>>();
         
         if (users is null)
         {

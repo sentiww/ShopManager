@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 using ShopManager.Persistence;
 using ShopManager.Web.Endpoints.Collections;
-using ShopManager.Web.Utilities;
 using Testcontainers.PostgreSql;
 
 namespace ShopManager.Web.Tests;

@@ -4,12 +4,14 @@ using MudBlazor;
 using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
 using ShopManager.Client.Requests;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
 
 public interface IDiscountService
 {
-    public Task<PaginatedResonse<DiscountDto>> GetDiscountsAsync(
+    public Task<PagedCollection<DiscountDto>> GetDiscountsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
@@ -30,7 +32,7 @@ internal sealed class DiscountService : IDiscountService
         _httpClient = httpClient;
     }
     
-    public async Task<PaginatedResonse<DiscountDto>> GetDiscountsAsync(
+    public async Task<PagedCollection<DiscountDto>> GetDiscountsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
@@ -60,7 +62,7 @@ internal sealed class DiscountService : IDiscountService
         
         var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("http://localhost:8000/api/v1/discounts", query));
         
-        var discounts = await response.Content.ReadFromJsonAsync<PaginatedResonse<DiscountDto>>();
+        var discounts = await response.Content.ReadFromJsonAsync<PagedCollection<DiscountDto>>();
         
         if (discounts is null)
         {

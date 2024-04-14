@@ -1,8 +1,4 @@
-using System.Diagnostics;
-using DockerComposeFixture;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using Xunit.Abstractions;
 
 namespace ShopManager.Web.SeleniumTests;
 

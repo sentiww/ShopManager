@@ -2,9 +2,10 @@ using Asp.Versioning.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 using ShopManager.Persistence;
 using ShopManager.Web.Common;
-using ShopManager.Web.Utilities;
 
 namespace ShopManager.Web.Endpoints.Discounts;
 

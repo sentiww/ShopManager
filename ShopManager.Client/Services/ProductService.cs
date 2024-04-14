@@ -4,18 +4,20 @@ using MudBlazor;
 using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
 using ShopManager.Client.Requests;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
 
 public interface IProductService
 {
-    public Task<PaginatedResonse<ProductDto>> GetProductsAsync(
+    public Task<PagedCollection<ProductDto>> GetProductsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
         SortDirection? sortDirection, 
         string? searchString);
-    public Task<ProductDetailsDto> GetProductAsync(Guid id);
+    public Task<ProductDto> GetProductAsync(Guid id);
     public Task AddProductAsync(AddProductRequest request);
     public Task RemoveProductAsync(Guid id);
     public Task EditProductAsync(Guid id, EditProductRequest request);
@@ -30,7 +32,7 @@ internal sealed class ProductService : IProductService
         _httpClient = httpClient;
     }
     
-    public async Task<PaginatedResonse<ProductDto>> GetProductsAsync(
+    public async Task<PagedCollection<ProductDto>> GetProductsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
@@ -60,7 +62,7 @@ internal sealed class ProductService : IProductService
 
         var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("http://localhost:8000/api/v1/products", query));
         
-        var products = await response.Content.ReadFromJsonAsync<PaginatedResonse<ProductDto>>();
+        var products = await response.Content.ReadFromJsonAsync<PagedCollection<ProductDto>>();
 
         if (products is null)
         {
@@ -70,11 +72,11 @@ internal sealed class ProductService : IProductService
         return products;
     }
 
-    public async Task<ProductDetailsDto> GetProductAsync(Guid id)
+    public async Task<ProductDto> GetProductAsync(Guid id)
     {
         var response = await _httpClient.GetAsync($"http://localhost:8000/api/v1/products/{id}");
         
-        var product = await response.Content.ReadFromJsonAsync<ProductDetailsDto>();
+        var product = await response.Content.ReadFromJsonAsync<ProductDto>();
         
         if (product is null)
         {

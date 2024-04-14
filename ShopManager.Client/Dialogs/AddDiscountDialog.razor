@@ -7,7 +7,8 @@
                  @ref="_form"
                  Validation="@_validator.ValidateValue"
                  ValidationDelay="0">
-            <MudNumericField @bind-Value="@_model.Percentage"
+            <MudNumericField T="decimal"
+                             @bind-Value="@_model.Percentage"
                              For="@(() => _model.Percentage)"
                              Immediate="true"
                              Label="Percentage"

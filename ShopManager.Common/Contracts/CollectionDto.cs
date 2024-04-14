@@ -1,4 +1,4 @@
-namespace ShopManager.Client.Dtos;
+namespace ShopManager.Common.Contracts;
 
 public sealed record CollectionDto
 {

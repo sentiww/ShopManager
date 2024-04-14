@@ -1,9 +1,9 @@
 @page "/collections/{IdBase64}"
 @attribute [Authorize]
 @using ShopManager.Client.Common
-@using ShopManager.Client.Dtos
 @using ShopManager.Client.Services
 @using Microsoft.AspNetCore.Authorization
+@using ShopManager.Common.Contracts
 <MudContainer>
     <h3>Product</h3>
     @if (CollectionDetails is null)
@@ -44,7 +44,7 @@
     [Inject]
     private ICollectionService CollectionService { get; set; } = null!;
     private Guid Id { get; set; }
-    private CollectionDetailsDto CollectionDetails { get; set; }
+    private CollectionDto CollectionDetails { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

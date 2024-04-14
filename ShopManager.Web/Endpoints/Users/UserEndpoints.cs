@@ -2,12 +2,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Asp.Versioning.Builder;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 using ShopManager.Persistence.Entity;
-using ShopManager.Web.Utilities;
 
 namespace ShopManager.Web.Endpoints.Users;
 
@@ -39,7 +41,7 @@ public static class UserEndpoints
         return builder;
     }
 
-    private static async Task<IdentityResult> CreateUser(
+    private static async Task<Ok<IdentityResult>> CreateUser(
         [FromServices] UserManager<ShopManagerUserEntity> userManager,
         [FromBody] CreateUserRequest request)
     {
@@ -51,20 +53,20 @@ public static class UserEndpoints
 
         var result = await userManager.CreateAsync(user, request.Password);
 
-        return result;
+        return TypedResults.Ok(result);
     }
 
-    private static async Task<JwtResponse> Login(
+    private static async Task<Results<Ok<JwtResponse>, UnauthorizedHttpResult>> Login(
         [FromServices] UserManager<ShopManagerUserEntity> userManager,
         [FromBody] LoginRequest request)
     {
         var user = await userManager.FindByEmailAsync(userManager.NormalizeEmail(request.Email));
         if (user is null)
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
 
         var result = await userManager.CheckPasswordAsync(user, request.Password);
         if (!result)
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
 
         var claims = new List<Claim>
         {
@@ -87,18 +89,18 @@ public static class UserEndpoints
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: credentials);
 
-        return new JwtResponse
+        return TypedResults.Ok(new JwtResponse
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token)
-        };
+        });
     }
     
-    private static Task<PagedCollection<UserDto>> GetUsers(
+    private static async Task<Ok<PagedCollection<UserDto>>> GetUsers(
         [FromServices] UserManager<ShopManagerUserEntity> userManager,
         [FromQuery] int page,
         [FromQuery] int pageSize)
     {
-        return userManager.Users
+        return TypedResults.Ok(await userManager.Users
             .OrderBy(user => user.UserName)
             .Select(user => new UserDto
             {
@@ -106,10 +108,10 @@ public static class UserEndpoints
                 UserName = user.UserName,
                 Email = user.Email
             })
-            .ToPagedCollectionAsync(page, pageSize);
+            .ToPagedCollectionAsync(page, pageSize));
     }
     
-    private static async Task<UserDto> GetUser(
+    private static async Task<Results<Ok<UserDto>, BadRequest<string>>> GetUser(
         [FromServices] UserManager<ShopManagerUserEntity> userManager,
         [FromRoute] string id)
     {
@@ -117,14 +119,14 @@ public static class UserEndpoints
         
         if (user is null)
         {
-            throw new Exception("User not found");
+            return TypedResults.BadRequest("User not found");
         }
 
-        return new UserDto
+        return TypedResults.Ok(new UserDto
         {
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email
-        };
+        });
     }
 }

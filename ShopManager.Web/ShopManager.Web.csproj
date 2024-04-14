@@ -30,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ShopManager.Common\ShopManager.Common.csproj" />
       <ProjectReference Include="..\ShopManager.Persistence\ShopManager.Persistence.csproj" />
     </ItemGroup>
 

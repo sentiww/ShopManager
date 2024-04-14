@@ -1,21 +1,21 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using MudBlazor;
-using ShopManager.Client.Common;
-using ShopManager.Client.Dtos;
 using ShopManager.Client.Requests;
+using ShopManager.Common.Contracts;
+using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
 
 public interface ICollectionService
 {
-    public Task<PaginatedResonse<CollectionDto>> GetCollectionsAsync(
+    public Task<PagedCollection<CollectionDto>> GetCollectionsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
         SortDirection? sortDirection, 
         string? searchString);
-    public Task<CollectionDetailsDto> GetCollectionAsync(Guid id);
+    public Task<CollectionDto> GetCollectionAsync(Guid id);
     public Task AddCollectionAsync(AddCollectionRequest request);
     public Task EditCollectionAsync(Guid id, EditCollectionRequest request);
     public Task RemoveCollectionAsync(Guid id);
@@ -30,7 +30,7 @@ internal sealed class CollectionService : ICollectionService
         _httpClient = httpClient;
     }
     
-    public async Task<PaginatedResonse<CollectionDto>> GetCollectionsAsync(
+    public async Task<PagedCollection<CollectionDto>> GetCollectionsAsync(
         int page, 
         int pageSize, 
         string? sortLabel, 
@@ -60,7 +60,7 @@ internal sealed class CollectionService : ICollectionService
 
         var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("http://localhost:8000/api/v1/collections", query));
         
-        var collections = await response.Content.ReadFromJsonAsync<PaginatedResonse<CollectionDto>>();
+        var collections = await response.Content.ReadFromJsonAsync<PagedCollection<CollectionDto>>();
         
         if (collections is null)
         {
@@ -70,11 +70,11 @@ internal sealed class CollectionService : ICollectionService
         return collections;
     }
 
-    public async Task<CollectionDetailsDto> GetCollectionAsync(Guid id)
+    public async Task<CollectionDto> GetCollectionAsync(Guid id)
     {
         var response = await _httpClient.GetAsync($"http://localhost:8000/api/v1/collections/{id}");
         
-        var collection = await response.Content.ReadFromJsonAsync<CollectionDetailsDto>();
+        var collection = await response.Content.ReadFromJsonAsync<CollectionDto>();
         
         if (collection is null)
         {

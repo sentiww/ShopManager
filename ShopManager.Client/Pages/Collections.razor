@@ -2,9 +2,9 @@
 @using Microsoft.AspNetCore.Authorization
 @using ShopManager.Client.Common
 @using ShopManager.Client.Dialogs
-@using ShopManager.Client.Dtos
 @using ShopManager.Client.Requests
 @using ShopManager.Client.Services
+@using ShopManager.Common.Contracts
 @attribute [Authorize]
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<CollectionDto>>>(ServerReload))"

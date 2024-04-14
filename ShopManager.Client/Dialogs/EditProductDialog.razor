@@ -18,7 +18,8 @@
                               Immediate="true"
                               Label="Description"
                               Lines="5"/>
-                <MudNumericField @bind-Value="@_model.Price"
+                <MudNumericField T="decimal"
+                                 @bind-Value="@_model.Price"
                                  For="@(() => _model.Price)"
                                  Immediate="true"
                                  Label="Price"

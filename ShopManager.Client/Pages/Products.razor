@@ -6,6 +6,7 @@
 @using ShopManager.Client.Requests
 @using ShopManager.Client.Common
 @using Microsoft.AspNetCore.Authorization
+@using ShopManager.Common.Contracts
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<ProductDto>>>(ServerReload))"
           Dense="true" 
