@@ -1,6 +1,6 @@
-namespace ShopManager.Client.Requests;
+namespace ShopManager.Common.Requests;
 
-public sealed record EditCollectionRequest
+public sealed record UpdateCollectionRequest
 {
     public required string Name { get; init; }
     public required Guid[] ProductIds { get; init; }

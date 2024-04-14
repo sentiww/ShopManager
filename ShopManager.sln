@@ -11,11 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Persistence", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Client", "ShopManager.Client\ShopManager.Client.csproj", "{00550586-8FEC-47A4-A22B-895AC57F03E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Web.IntegrationTests", "ShopManager.Web.IntegrationTests\ShopManager.Web.IntegrationTests.csproj", "{713B0C00-9E92-44D2-8640-EF7B45E26FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.IntegrationTests", "ShopManager.IntegrationTests\ShopManager.IntegrationTests.csproj", "{713B0C00-9E92-44D2-8640-EF7B45E26FBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Web.SeleniumTests", "ShopManager.Web.SeleniumTests\ShopManager.Web.SeleniumTests.csproj", "{F2E34AC0-7364-4706-9106-3EB1529B3218}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.SeleniumTests", "ShopManager.SeleniumTests\ShopManager.SeleniumTests.csproj", "{F2E34AC0-7364-4706-9106-3EB1529B3218}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.Common", "ShopManager.Common\ShopManager.Common.csproj", "{FB5CA51A-FC03-4389-B3BD-227E07B9B322}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopManager.UnitTests", "ShopManager.UnitTests\ShopManager.UnitTests.csproj", "{F8CA2552-3FE2-4263-A7A4-DE162362F987}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,5 +49,9 @@ Global
 		{FB5CA51A-FC03-4389-B3BD-227E07B9B322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB5CA51A-FC03-4389-B3BD-227E07B9B322}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB5CA51A-FC03-4389-B3BD-227E07B9B322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8CA2552-3FE2-4263-A7A4-DE162362F987}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8CA2552-3FE2-4263-A7A4-DE162362F987}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8CA2552-3FE2-4263-A7A4-DE162362F987}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8CA2552-3FE2-4263-A7A4-DE162362F987}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

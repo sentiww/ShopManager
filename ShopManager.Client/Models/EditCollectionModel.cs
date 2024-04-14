@@ -1,4 +1,4 @@
-using ShopManager.Client.Requests;
+using ShopManager.Common.Requests;
 
 namespace ShopManager.Client.Models;
 
@@ -11,9 +11,9 @@ public sealed class EditCollectionModel
 
 public static class EditCollectionModelExtensions
 {
-    public static EditCollectionRequest ToRequest(this EditCollectionModel model)
+    public static UpdateCollectionRequest ToRequest(this EditCollectionModel model)
     {
-        return new EditCollectionRequest
+        return new UpdateCollectionRequest
         {
             Name = model.Name,
             ProductIds = model.ProductIds,

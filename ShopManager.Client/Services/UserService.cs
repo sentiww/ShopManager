@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
 using ShopManager.Client.Providers;
-using ShopManager.Client.Requests;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;

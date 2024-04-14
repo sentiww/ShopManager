@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 using ShopManager.Persistence;
 using ShopManager.Web.Common;

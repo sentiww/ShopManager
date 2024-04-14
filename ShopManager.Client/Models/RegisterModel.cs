@@ -1,4 +1,4 @@
-using ShopManager.Client.Requests;
+using ShopManager.Common.Requests;
 
 namespace ShopManager.Client.Models;
 

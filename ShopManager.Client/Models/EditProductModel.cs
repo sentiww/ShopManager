@@ -1,4 +1,4 @@
-using ShopManager.Client.Requests;
+using ShopManager.Common.Requests;
 
 namespace ShopManager.Client.Models;
 
@@ -12,7 +12,7 @@ public sealed class EditProductModel
 
 public static class EditProductModelExtensions
 {
-    public static EditProductRequest ToRequest(this EditProductModel model) => new() 
+    public static UpdateProductRequest ToRequest(this EditProductModel model) => new() 
     {
         Name = model.Name,
         Description = model.Description,

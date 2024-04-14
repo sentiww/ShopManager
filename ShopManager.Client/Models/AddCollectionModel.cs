@@ -1,4 +1,4 @@
-using ShopManager.Client.Requests;
+using ShopManager.Common.Requests;
 
 namespace ShopManager.Client.Models;
 
@@ -9,9 +9,9 @@ public sealed class AddCollectionModel
 
 public static class AddCollectionModelExtensions
 {
-    public static AddCollectionRequest ToRequest(this AddCollectionModel model)
+    public static CreateCollectionRequest ToRequest(this AddCollectionModel model)
     {
-        return new AddCollectionRequest
+        return new CreateCollectionRequest
         {
             Name = model.Name,
             ProductIds = Array.Empty<Guid>(),

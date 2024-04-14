@@ -1,4 +1,4 @@
-namespace ShopManager.Client.Requests;
+namespace ShopManager.Common.Requests;
 
 public sealed record RegisterRequest
 {

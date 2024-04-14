@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using MudBlazor;
-using ShopManager.Client.Requests;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
@@ -16,8 +16,8 @@ public interface ICollectionService
         SortDirection? sortDirection, 
         string? searchString);
     public Task<CollectionDto> GetCollectionAsync(Guid id);
-    public Task AddCollectionAsync(AddCollectionRequest request);
-    public Task EditCollectionAsync(Guid id, EditCollectionRequest request);
+    public Task AddCollectionAsync(CreateCollectionRequest request);
+    public Task EditCollectionAsync(Guid id, UpdateCollectionRequest request);
     public Task RemoveCollectionAsync(Guid id);
 }
 
@@ -84,12 +84,12 @@ internal sealed class CollectionService : ICollectionService
         return collection;
     }
 
-    public async Task AddCollectionAsync(AddCollectionRequest request)
+    public async Task AddCollectionAsync(CreateCollectionRequest request)
     {
         await _httpClient.PostAsJsonAsync("http://localhost:8000/api/v1/collections", request);
     }
 
-    public async Task EditCollectionAsync(Guid id, EditCollectionRequest request)
+    public async Task EditCollectionAsync(Guid id, UpdateCollectionRequest request)
     {
         await _httpClient.PutAsJsonAsync($"http://localhost:8000/api/v1/collections/{id}", request);
     }

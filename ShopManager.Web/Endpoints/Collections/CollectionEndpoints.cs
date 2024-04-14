@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 using ShopManager.Persistence;
 using ShopManager.Web.Common;
@@ -148,7 +149,7 @@ public static class CollectionEndpoints
     }
 
     private static async Task<Results<BadRequest<string>, Ok<Guid>>> CreateCollection(
-        [FromBody] AddCollectionRequest request,
+        [FromBody] CreateCollectionRequest request,
         [FromServices] ShopManagerContext context,
         CancellationToken ct)
     {

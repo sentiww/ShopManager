@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 using ShopManager.Persistence;
-using ShopManager.Web.Endpoints.Collections;
 using Testcontainers.PostgreSql;
 
 namespace ShopManager.Web.Tests;
@@ -119,7 +119,7 @@ public class CollectionEndpoints
         
         var url = new Uri(client.BaseAddress, "/api/v1/collections");
         
-        var request = new AddCollectionRequest
+        var request = new CreateCollectionRequest
         {
             Name = "Test Collection",
             ProductIds = Array.Empty<Guid>(),
@@ -154,7 +154,7 @@ public class CollectionEndpoints
         
         var url = new Uri(client.BaseAddress, "/api/v1/collections");
         
-        var request = new AddCollectionRequest
+        var request = new CreateCollectionRequest
         {
             Name = "Test Collection",
             ProductIds = new[] { Guid.NewGuid() },
@@ -182,7 +182,7 @@ public class CollectionEndpoints
         
         var url = new Uri(client.BaseAddress, "/api/v1/collections");
         
-        var request = new AddCollectionRequest
+        var request = new CreateCollectionRequest
         {
             Name = "Test Collection",
             ProductIds = Array.Empty<Guid>(),

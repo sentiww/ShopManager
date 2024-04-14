@@ -1,6 +1,6 @@
-namespace ShopManager.Client.Requests;
+namespace ShopManager.Common.Requests;
 
-public sealed record EditDiscountRequest
+public sealed record UpdateDiscountRequest
 {
     public required decimal Percentage { get; init; }
     public required DateTime StartDate { get; init; }

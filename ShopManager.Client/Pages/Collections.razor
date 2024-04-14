@@ -2,9 +2,9 @@
 @using Microsoft.AspNetCore.Authorization
 @using ShopManager.Client.Common
 @using ShopManager.Client.Dialogs
-@using ShopManager.Client.Requests
 @using ShopManager.Client.Services
 @using ShopManager.Common.Contracts
+@using ShopManager.Common.Requests
 @attribute [Authorize]
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<CollectionDto>>>(ServerReload))"
@@ -140,7 +140,7 @@
     private async Task AddNewCollection()
     {
         var dialog = await DialogService.ShowAsync<AddCollectionDialog>("Add new collection");
-        var request = await dialog.GetReturnValueAsync<AddCollectionRequest>();
+        var request = await dialog.GetReturnValueAsync<CreateCollectionRequest>();
 
         if (request is not null)
         {
@@ -156,7 +156,7 @@
             { nameof(EditCollectionDialog.CollectionId), id }
         });
         
-        var request = await dialog.GetReturnValueAsync<EditCollectionRequest>();
+        var request = await dialog.GetReturnValueAsync<UpdateCollectionRequest>();
         
         if (request is not null)
         {

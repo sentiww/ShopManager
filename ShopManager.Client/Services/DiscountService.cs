@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using MudBlazor;
 using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
-using ShopManager.Client.Requests;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
@@ -18,8 +18,8 @@ public interface IDiscountService
         SortDirection? sortDirection,
         string? searchString);
     public Task<DiscountDto> GetDiscountAsync(Guid id);
-    public Task AddDiscountAsync(AddDiscountRequest request);
-    public Task EditDiscountAsync(Guid id, EditDiscountRequest request);
+    public Task AddDiscountAsync(CreateDiscountRequest request);
+    public Task EditDiscountAsync(Guid id, UpdateDiscountRequest request);
     public Task RemoveDiscountAsync(Guid id);
 }
 
@@ -86,12 +86,12 @@ internal sealed class DiscountService : IDiscountService
         return discount;
     }
 
-    public async Task AddDiscountAsync(AddDiscountRequest request)
+    public async Task AddDiscountAsync(CreateDiscountRequest request)
     {
         await _httpClient.PostAsJsonAsync("http://localhost:8000/api/v1/discounts", request);
     }
 
-    public async Task EditDiscountAsync(Guid id, EditDiscountRequest request)
+    public async Task EditDiscountAsync(Guid id, UpdateDiscountRequest request)
     {
         await _httpClient.PutAsJsonAsync($"http://localhost:8000/api/v1/discounts/{id}", request);
     }

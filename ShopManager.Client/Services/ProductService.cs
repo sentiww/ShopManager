@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using MudBlazor;
 using ShopManager.Client.Common;
 using ShopManager.Client.Dtos;
-using ShopManager.Client.Requests;
 using ShopManager.Common.Contracts;
+using ShopManager.Common.Requests;
 using ShopManager.Common.Utilities;
 
 namespace ShopManager.Client.Services;
@@ -18,9 +18,9 @@ public interface IProductService
         SortDirection? sortDirection, 
         string? searchString);
     public Task<ProductDto> GetProductAsync(Guid id);
-    public Task AddProductAsync(AddProductRequest request);
+    public Task AddProductAsync(CreateProductRequest request);
     public Task RemoveProductAsync(Guid id);
-    public Task EditProductAsync(Guid id, EditProductRequest request);
+    public Task EditProductAsync(Guid id, UpdateProductRequest request);
 }
 
 internal sealed class ProductService : IProductService
@@ -86,7 +86,7 @@ internal sealed class ProductService : IProductService
         return product;
     }
     
-    public async Task AddProductAsync(AddProductRequest request)
+    public async Task AddProductAsync(CreateProductRequest request)
     {
         await _httpClient.PostAsJsonAsync("http://localhost:8000/api/v1/products", request);
     }
@@ -96,7 +96,7 @@ internal sealed class ProductService : IProductService
         await _httpClient.DeleteAsync($"http://localhost:8000/api/v1/products/{id}");
     }
 
-    public async Task EditProductAsync(Guid id, EditProductRequest request)
+    public async Task EditProductAsync(Guid id, UpdateProductRequest request)
     {
         await _httpClient.PutAsJsonAsync($"http://localhost:8000/api/v1/products/{id}", request);
     }

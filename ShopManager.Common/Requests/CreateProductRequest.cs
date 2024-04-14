@@ -1,6 +1,6 @@
-namespace ShopManager.Client.Requests;
+namespace ShopManager.Common.Requests;
 
-public sealed record AddProductRequest
+public sealed record CreateProductRequest
 {
     public required string Name { get; init; }
     public required string Description { get; init; }

@@ -1,6 +1,6 @@
-namespace ShopManager.Client.Requests;
+namespace ShopManager.Common.Requests;
 
-public sealed record AddDiscountRequest
+public sealed record CreateDiscountRequest
 {
     public decimal Percentage { get; set; }
     public DateTime StartDate { get; set; }

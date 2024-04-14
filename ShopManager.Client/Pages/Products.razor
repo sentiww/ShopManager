@@ -3,10 +3,10 @@
 @using ShopManager.Client.Services
 @using ShopManager.Client.Dtos
 @using ShopManager.Client.Dialogs
-@using ShopManager.Client.Requests
 @using ShopManager.Client.Common
 @using Microsoft.AspNetCore.Authorization
 @using ShopManager.Common.Contracts
+@using ShopManager.Common.Requests
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<ProductDto>>>(ServerReload))"
           Dense="true" 
@@ -141,7 +141,7 @@
     private async Task AddNewProduct()
     {
         var dialog = await DialogService.ShowAsync<AddProductDialog>("Add new product");
-        var request = await dialog.GetReturnValueAsync<AddProductRequest>();
+        var request = await dialog.GetReturnValueAsync<CreateProductRequest>();
 
         if (request is not null)
         {
@@ -157,7 +157,7 @@
             { nameof(EditProductDialog.ProductId), id }
         });
         
-        var request = await dialog.GetReturnValueAsync<EditProductRequest>();
+        var request = await dialog.GetReturnValueAsync<UpdateProductRequest>();
         
         if (request is not null)
         {

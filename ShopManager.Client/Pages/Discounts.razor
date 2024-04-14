@@ -3,9 +3,9 @@
 @using ShopManager.Client.Common
 @using ShopManager.Client.Dialogs
 @using ShopManager.Client.Dtos
-@using ShopManager.Client.Requests
 @using ShopManager.Client.Services
 @using ShopManager.Common.Contracts
+@using ShopManager.Common.Requests
 @attribute [Authorize]
 
 <MudTable ServerData="@(new Func<TableState, Task<TableData<DiscountDto>>>(ServerReload))"
@@ -150,7 +150,7 @@
     private async Task AddNewDiscount()
     {
         var dialog = await DialogService.ShowAsync<AddDiscountDialog>("Add new discount");
-        var request = await dialog.GetReturnValueAsync<AddDiscountRequest>();
+        var request = await dialog.GetReturnValueAsync<CreateDiscountRequest>();
 
         if (request is not null)
         {
@@ -166,7 +166,7 @@
             { nameof(EditDiscountDialog.DiscountId), id }
         });
         
-        var request = await dialog.GetReturnValueAsync<EditDiscountRequest>();
+        var request = await dialog.GetReturnValueAsync<UpdateDiscountRequest>();
         
         if (request is not null)
         {

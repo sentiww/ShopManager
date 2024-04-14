@@ -1,5 +1,5 @@
 using MudBlazor;
-using ShopManager.Client.Requests;
+using ShopManager.Common.Requests;
 
 namespace ShopManager.Client.Models;
 
@@ -12,9 +12,9 @@ public sealed class EditDiscountModel
 
 public static class EditDiscountModelExtensions
 {
-    public static EditDiscountRequest ToRequest(this EditDiscountModel model)
+    public static UpdateDiscountRequest ToRequest(this EditDiscountModel model)
     {
-        return new EditDiscountRequest
+        return new UpdateDiscountRequest
         {
             Percentage = model.Percentage,
             StartDate = model.StartEndDate.Start.Value,
